@@ -3,94 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saját BaZi Kalkulátorom</title>
-    <!-- Megbízhatóbb forrás a számítási motorhoz -->
-    <script src="https://cloudflare.com"></script>
+    <title>Kínai Sorstérkép</title>
+    <!-- Ez a legstabilabb elérési út a motorhoz -->
+    <script src="https://unpkg.com"></script>
     <style>
-        :root { --arany: #d4af37; --sotet: #1a1a1a; --szurke: #2d2d2d; }
-        body { font-family: 'Georgia', serif; background-color: var(--sotet); color: #f4f4f4; text-align: center; margin: 0; padding: 20px; }
-        .box { max-width: 600px; margin: 30px auto; background: var(--szurke); padding: 30px; border-radius: 15px; border: 1px solid var(--arany); box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
-        h1 { color: var(--arany); margin-bottom: 10px; }
-        input { padding: 12px; border-radius: 5px; border: 1px solid var(--arany); background: #333; color: white; margin-bottom: 20px; width: 80%; max-width: 300px; }
-        button { background: var(--arany); color: black; border: none; padding: 15px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
-        button:hover { transform: scale(1.05); background: #f1c40f; }
-        
-        .bazi-table { display: flex; justify-content: space-around; margin-top: 30px; gap: 10px; flex-wrap: wrap; }
-        .col { flex: 1; min-width: 100px; border: 1px solid #444; padding: 15px 5px; border-radius: 8px; background: rgba(0,0,0,0.3); }
-        .label { font-size: 12px; color: var(--arany); text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .stem { font-size: 18px; font-weight: bold; padding: 8px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; text-shadow: 1px 1px 2px black; }
-        .branch { font-size: 14px; color: #ddd; }
-
-        /* Színkódok az elemekhez */
-        .fa { background-color: #27ae60; } .tuz { background-color: #c0392b; }
-        .fold { background-color: #b7950b; } .fem { background-color: #7f8c8d; }
-        .viz { background-color: #2980b9; }
-
-        .cta-box { margin-top: 40px; padding: 20px; border-top: 1px solid #444; }
-        .email-btn { background: transparent; border: 2px solid var(--arany); color: var(--arany); margin-top: 10px; text-decoration: none; display: inline-block; padding: 10px 20px; border-radius: 5px; }
+        :root { --arany: #d4af37; --sotet: #1a1a1a; }
+        body { font-family: 'Georgia', serif; background: var(--sotet); color: #f4f4f4; text-align: center; padding: 20px; }
+        .box { max-width: 500px; margin: auto; background: #2d2d2d; padding: 25px; border-radius: 15px; border: 1px solid var(--arany); }
+        h1 { color: var(--arany); }
+        input { padding: 10px; border-radius: 5px; margin-bottom: 20px; width: 80%; }
+        button { background: var(--arany); color: black; border: none; padding: 12px 25px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .grid { display: flex; justify-content: space-around; margin-top: 20px; gap: 5px; display:none; }
+        .col { flex: 1; border: 1px solid #444; padding: 10px 2px; border-radius: 5px; background: rgba(0,0,0,0.2); }
+        .label { font-size: 10px; color: var(--arany); display: block; margin-bottom: 5px; }
+        .stem { font-weight: bold; font-size: 14px; padding: 5px; border-radius: 3px; display: block; margin-bottom: 3px; color: white; }
+        .branch { font-size: 12px; color: #ccc; }
+        .fa { background: #27ae60; } .tuz { background: #c0392b; } .fold { background: #b7950b; } .fem { background: #7f8c8d; } .viz { background: #2980b9; }
+        .cta { margin-top: 30px; border-top: 1px solid #444; padding-top: 15px; }
+        a { color: var(--arany); text-decoration: none; border: 1px solid var(--arany); padding: 5px 10px; border-radius: 5px; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="box">
     <h1>Kínai Sorstérkép</h1>
-    <p>Tudd meg az elemeidet és az állatjegyeidet!</p>
-    
     <input type="datetime-local" id="bDate">
     <br>
     <button onclick="calc()">Sorsfejtés</button>
 
-    <div id="res" class="bazi-table" style="display:none;">
-        <div class="col"><span class="label">Óra</span><div id="hS"></div><div id="hB"></div></div>
-        <div class="col"><span class="label">Nap</span><div id="dS"></div><div id="dB"></div></div>
-        <div class="col"><span class="label">Hónap</span><div id="mS"></div><div id="mB"></div></div>
-        <div class="col"><span class="label">Év</span><div id="yS"></div><div id="yB"></div></div>
+    <div id="res" class="grid">
+        <div class="col"><span class="label">ÓRA</span><div id="hS"></div><div id="hB"></div></div>
+        <div class="col"><span class="label">NAP</span><div id="dS"></div><div id="dB"></div></div>
+        <div class="col"><span class="label">HÓNAP</span><div id="mS"></div><div id="mB"></div></div>
+        <div class="col"><span class="label">ÉV</span><div id="yS"></div><div id="yB"></div></div>
     </div>
 
-    <div class="cta-box">
-        <h3>Szeretnél mélyebb elemzést?</h3>
-        <p>Kérj személyre szabott tanácsadást tőlem!</p>
-        <!-- ÍRD ÁT AZ EMAIL CÍMEDET ITT LENT! -->
-        <a href="mailto:kcserier@gmail.com@://gmail.com elemzés érdeklődés" class="email-btn">Email küldése</a>
+    <div class="cta">
+        <p>Szeretnél mélyebb elemzést?</p>
+        <a href="mailto:SajátEmailCímed@gmail.com">Írj nekem e-mailt!</a>
     </div>
 </div>
 
 <script>
 const dict = {
-    '甲': { n: 'Jang Fa', c: 'fa' }, '乙': { n: 'Jin Fa', c: 'fa' },
-    '丙': { n: 'Jang Tűz', c: 'tuz' }, '丁': { n: 'Jin Tűz', c: 'tuz' },
-    '戊': { n: 'Jang Föld', c: 'fold' }, '己': { n: 'Jin Föld', c: 'fold' },
-    '庚': { n: 'Jang Fém', c: 'fem' }, '辛': { n: 'Jin Fém', c: 'fem' },
-    '壬': { n: 'Jang Víz', c: 'viz' }, '癸': { n: 'Jin Víz', c: 'viz' },
-    '子': 'Patkány', '丑': 'Bivaly', '寅': 'Tigris', '卯': 'Nyúl', '辰': 'Sárkány',
-    '巳': 'Kígyó', '午': 'Ló', '未': 'Kecske', '申': 'Majom', '酉': 'Kakas', '戌': 'Kutya', '亥': 'Disznó'
+    '甲':['Jang Fa','fa'],'乙':['Jin Fa','fa'],'丙':['Jang Tűz','tuz'],'丁':['Jin Tűz','tuz'],'戊':['Jang Föld','fold'],'己':['Jin Föld','fold'],'庚':['Jang Fém','fem'],'辛':['Jin Fém','fem'],'壬':['Jang Víz','viz'],'癸':['Jin Víz','viz'],
+    '子':'Patkány','丑':'Bivaly','寅':'Tigris','卯':'Nyúl','辰':'Sárkány','巳':'Kígyó','午':'Ló','未':'Kecske','申':'Majom','酉':'Kakas','戌':'Kutya','亥':'Disznó'
 };
 
-function setEl(id, ch, isStem) {
+function set(id, ch, isS) {
     const d = document.getElementById(id);
-    if(isStem) {
-        d.innerText = dict[ch].n;
-        d.className = 'stem ' + dict[ch].c;
-    } else {
-        d.innerText = dict[ch] || ch;
-        d.className = 'branch';
-    }
+    if(isS) { d.innerText = dict[ch][0]; d.className = 'stem ' + dict[ch][1]; }
+    else { d.innerText = dict[ch] || ch; d.className = 'branch'; }
 }
 
 function calc() {
     try {
         const v = document.getElementById('bDate').value;
-        if(!v) return alert("Válassz dátumot!");
-        const l = Lunar.fromDate(new Date(v));
+        if(!v) return;
+        // Itt hívjuk meg a Lunar könyvtárat
+        const l = Solar.fromDate(new Date(v)).getLunar();
         const b = l.getEightChar();
         
-        setEl('yS', b.getYearGan(), true); setEl('yB', b.getYearZhi(), false);
-        setEl('mS', b.getMonthGan(), true); setEl('mB', b.getMonthZhi(), false);
-        setEl('dS', b.getDayGan(), true); setEl('dB', b.getDayZhi(), false);
-        setEl('hS', b.getHourGan(), true); setEl('hB', b.getHourZhi(), false);
+        set('yS', b.getYearGan(), true); set('yB', b.getYearZhi(), false);
+        set('mS', b.getMonthGan(), true); set('mB', b.getMonthZhi(), false);
+        set('dS', b.getDayGan(), true); set('dB', b.getDayZhi(), false);
+        set('hS', b.getHourGan(), true); set('hB', b.getHourZhi(), false);
         
         document.getElementById('res').style.display = 'flex';
-    } catch(e) { alert("Hiba történt a számítás során."); }
+    } catch(e) { 
+        console.log(e);
+        alert("Várj egy pillanatot, amíg a rendszer betölt, majd próbáld újra!"); 
+    }
 }
 </script>
 </body>
