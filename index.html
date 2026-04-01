@@ -4,54 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kínai Sorsfejtő</title>
-    <!-- JAVÍTOTT SCRIPTS: A lunar-javascript-hez két fájl kell -->
-    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+    <!-- JAVÍTOTT: Megbízható CDN forrás -->
+    <script src="https://cloudflare.com"></script>
     <style>
         :root { --arany: #d4af37; --sotet: #1a1a1a; }
         body { font-family: 'Georgia', serif; background: var(--sotet); color: #f4f4f4; text-align: center; padding: 20px; }
         .box { max-width: 450px; margin: auto; background: #2d2d2d; padding: 25px; border-radius: 15px; border: 1px solid var(--arany); box-shadow: 0 0 20px rgba(212,175,55,0.3); }
-        h1 { color: var(--arany); margin-bottom: 10px; }
-        input { padding: 12px; border-radius: 5px; margin-bottom: 20px; width: 85%; border: 1px solid var(--arany); background: #333; color: white; font-size: 16px; }
-        button { background: var(--arany); color: black; border: none; padding: 15px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 90%; margin-bottom: 20px; transition: 0.3s; }
-        button:hover { background: #f1c40f; transform: scale(1.02); }
-        
+        h1 { color: var(--arany); }
+        input { padding: 12px; border-radius: 5px; margin-bottom: 20px; width: 85%; border: 1px solid var(--arany); background: #333; color: white; }
+        button { background: var(--arany); color: black; border: none; padding: 15px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 90%; margin-bottom: 20px; }
         .grid { display: none; justify-content: space-around; gap: 5px; margin-top: 20px; }
-        .col { flex: 1; border: 1px solid #555; padding: 10px 2px; border-radius: 8px; background: rgba(0,0,0,0.4); min-width: 80px; }
-        .label { font-size: 11px; color: var(--arany); display: block; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
-        .stem { font-weight: bold; font-size: 13px; padding: 5px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; min-height: 20px; }
-        .branch { font-size: 12px; color: #eee; display: block; margin-top: 5px; }
-
-        /* Elemi színek */
-        .fa { background: #27ae60 !important; } 
-        .tuz { background: #c0392b !important; } 
-        .fold { background: #b7950b !important; } 
-        .fem { background: #7f8c8d !important; } 
-        .viz { background: #2980b9 !important; }
-
+        .col { flex: 1; border: 1px solid #555; padding: 10px 2px; border-radius: 8px; background: rgba(0,0,0,0.4); }
+        .label { font-size: 10px; color: var(--arany); display: block; margin-bottom: 5px; font-weight: bold; }
+        .stem { font-weight: bold; font-size: 13px; padding: 5px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; }
+        .branch { font-size: 12px; color: #eee; }
+        .fa { background: #27ae60; } .tuz { background: #c0392b; } .fold { background: #b7950b; } .fem { background: #7f8c8d; } .viz { background: #2980b9; }
         .cta { margin-top: 30px; border-top: 1px solid #444; padding-top: 20px; }
-        .email-link { color: var(--arany); text-decoration: none; border: 1px solid var(--arany); padding: 10px 20px; border-radius: 5px; display: inline-block; transition: 0.3s; }
-        .email-link:hover { background: var(--arany); color: black; }
+        .email-link { color: var(--arany); text-decoration: none; border: 1px solid var(--arany); padding: 10px 20px; border-radius: 5px; display: inline-block; }
     </style>
 </head>
 <body>
 
 <div class="box">
     <h1>Kínai Sorsfejtő</h1>
-    <p style="font-size: 0.9em; color: #aaa;">Add meg a születési időpontodat:</p>
     <input type="datetime-local" id="bDate">
     <button onclick="calc()">Sorsfejtés Generálása</button>
 
     <div id="res" class="grid">
-        <div class="col"><span class="label">Év</span><div id="yS"></div><div id="yB" class="branch"></div></div>
-        <div class="col"><span class="label">Hónap</span><div id="mS"></div><div id="mB" class="branch"></div></div>
-        <div class="col"><span class="label">Nap</span><div id="dS"></div><div id="dB" class="branch"></div></div>
-        <div class="col"><span class="label">Óra</span><div id="hS"></div><div id="hB" class="branch"></div></div>
+        <div class="col"><span class="label">ÓRA</span><div id="hS"></div><div id="hB" class="branch"></div></div>
+        <div class="col"><span class="label">NAP</span><div id="dS"></div><div id="dB" class="branch"></div></div>
+        <div class="col"><span class="label">HÓNAP</span><div id="mS"></div><div id="mB" class="branch"></div></div>
+        <div class="col"><span class="label">ÉV</span><div id="yS"></div><div id="yB" class="branch"></div></div>
     </div>
 
     <div class="cta">
         <p>Szeretnél részletes elemzést?</p>
-        <!-- JAVÍTOTT MAILTO LINK -->
-        <a href="mailto:kcserier@://gmail.com" class="email-link">Kapcsolatfelvétel</a>
+        <a href="mailto:kcserier@://gmail.com érdeklődés" class="email-link">Kapcsolatfelvétel</a>
     </div>
 </div>
 
@@ -67,23 +55,23 @@ const szotar = {
 function calc() {
     try {
         const val = document.getElementById('bDate').value;
-        if(!val) { alert("Kérlek, válassz dátumot!"); return; }
+        if(!val) return;
         
         const d = new Date(val);
-        // A lunar-javascript használata:
+        // JAVÍTOTT ELÉRÉS: A Solar és Lunar globálisan elérhető a script betöltése után
         const solar = Solar.fromDate(d);
-        const eightChar = solar.getLunar().getEightChar();
+        const lunar = solar.getLunar();
+        const baZi = lunar.getEightChar();
         
-        // Adatok beírása (Sorrend: Év, Hónap, Nap, Óra a hagyományos bazi megjelenítéshez)
-        megjelenit('yS', 'yB', eightChar.getYearGan(), eightChar.getYearZhi());
-        megjelenit('mS', 'mB', eightChar.getMonthGan(), eightChar.getMonthZhi());
-        megjelenit('dS', 'dB', eightChar.getDayGan(), eightChar.getDayZhi());
-        megjelenit('hS', 'hB', eightChar.getHourGan(), eightChar.getHourZhi());
+        megjelenit('yS', 'yB', baZi.getYearGan(), baZi.getYearZhi());
+        megjelenit('mS', 'mB', baZi.getMonthGan(), baZi.getMonthZhi());
+        megjelenit('dS', 'dB', baZi.getDayGan(), baZi.getDayZhi());
+        megjelenit('hS', 'hB', baZi.getHourGan(), baZi.getHourZhi());
         
         document.getElementById('res').style.display = 'flex';
     } catch(e) { 
-        alert("Hiba történt a számítás során.");
-        console.error(e);
+        console.error("Hiba:", e);
+        alert("Hiba történt. Ellenőrizd az internetkapcsolatot és próbáld újra!");
     }
 }
 
@@ -91,7 +79,7 @@ function megjelenit(sId, bId, sChar, bChar) {
     const sEl = document.getElementById(sId);
     const bEl = document.getElementById(bId);
     
-    const sData = szotar[sChar] || [sChar, '']; 
+    const sData = szotar[sChar] || [sChar, ''];
     const bName = szotar[bChar] || bChar;
     
     sEl.innerText = sData[0];
