@@ -49,41 +49,22 @@
 
 <script>
 const dict = {
-    '甲':['Jang Fa','fa'],'乙':['Jin Fa','fa'],'丙':['Jang Tűz','tuz'],'丁':['Jin Tűz','tuz'],'戊':['Jang Föld','fold'],'己':['Jin Föld','fold'],'庚':['Jang Fém','fem'],'辛':['Jin Fém','fem'],'壬':['Jang Víz','viz'],'癸':['Jin Víz','viz'],
+    '甲':'Jang Fa','乙':'Jin Fa','丙':'Jang Tűz','丁':'Jin Tűz','戊':'Jang Föld','己':'Jin Föld','庚':'Jang Fém','辛':'Jin Fém','壬':'Jang Víz','癸':'Jin Víz',
     '子':'Patkány','丑':'Bivaly','寅':'Tigris','卯':'Nyúl','辰':'Sárkány','巳':'Kígyó','午':'Ló','未':'Kecske','申':'Majom','酉':'Kakas','戌':'Kutya','亥':'Disznó'
+};
+
+const colors = {
+    'Jang Fa':'fa','Jin Fa':'fa','Jang Tűz':'tuz','Jin Tűz':'tuz','Jang Föld':'fold','Jin Föld':'fold','Jang Fém':'fem','Jin Fém':'fem','Jang Víz':'viz','Jin Víz':'viz'
 };
 
 function set(id, ch, isS) {
     const d = document.getElementById(id);
-    const data = dict[ch];
-    if(isS && data) { 
-        d.innerText = data[0]; 
-        d.className = 'stem ' + data[1]; 
-    } else { 
-        d.innerText = dict[ch] || ch; 
-        d.className = 'branch'; 
-    }
-}
-
-function calc() {
-    try {
-        const v = document.getElementById('bDate').value;
-        if(!v) { alert("Kérlek válassz dátumot!"); return; }
-        
-        // Ez a legbiztosabb hívás a Lunar.js könyvtárhoz
-        const d = new Date(v);
-        const l = Solar.fromDate(d).getLunar();
-        const b = l.getEightChar();
-        
-        set('yS', b.getYearGan(), true); set('yB', b.getYearZhi(), false);
-        set('mS', b.getMonthGan(), true); set('mB', b.getMonthZhi(), false);
-        set('dS', b.getDayGan(), true); set('dB', b.getDayZhi(), false);
-        set('hS', b.getHourGan(), true); set('hB', b.getHourZhi(), false);
-        
-        document.getElementById('res').style.display = 'flex';
-    } catch(e) { 
-        console.error(e);
-        alert("Hiba: Frissítsd az oldalt (F5), és próbáld újra!"); 
+    const nev = dict[ch] || ch;
+    d.innerText = nev;
+    if(isS) {
+        d.className = 'stem ' + (colors[nev] || '');
+    } else {
+        d.className = 'branch';
     }
 }
 </script>
