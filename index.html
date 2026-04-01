@@ -12,12 +12,12 @@
         h1 { color: var(--arany); }
         input { padding: 12px; border-radius: 5px; margin-bottom: 20px; width: 85%; border: 1px solid var(--arany); background: #333; color: white; }
         button { background: var(--arany); color: black; border: none; padding: 15px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 90%; margin-bottom: 20px; }
-        .grid { display: flex; justify-content: space-around; gap: 5px; display: none; }
+        .grid { display: none; justify-content: space-around; gap: 5px; margin-top: 20px; }
         .col { flex: 1; border: 1px solid #555; padding: 10px 2px; border-radius: 8px; background: rgba(0,0,0,0.4); }
         .label { font-size: 10px; color: var(--arany); display: block; margin-bottom: 5px; font-weight: bold; }
-        .stem { font-weight: bold; font-size: 14px; padding: 5px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; text-shadow: 1px 1px 2px black; }
-        .branch { font-size: 13px; color: #eee; }
-        /* Elemszínek */
+        .stem { font-weight: bold; font-size: 13px; padding: 5px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; }
+        .branch { font-size: 12px; color: #eee; }
+        /* Színek */
         .fa { background: #27ae60; } .tuz { background: #c0392b; } .fold { background: #b7950b; } .fem { background: #7f8c8d; } .viz { background: #2980b9; }
         .cta { margin-top: 30px; border-top: 1px solid #444; padding-top: 20px; }
         .email-link { color: var(--arany); text-decoration: none; border: 1px solid var(--arany); padding: 10px 20px; border-radius: 5px; display: inline-block; }
@@ -44,35 +44,46 @@
 </div>
 
 <script>
-const dict = {
-    '甲':['Jang Fa','fa'],'乙':['Jin Fa','fa'],'丙':['Jang Tűz','tuz'],'丁':['Jin Tűz','tuz'],'戊':['Jang Föld','fold'],'己':['Jin Föld','fold'],'庚':['Jang Fém','fem'],'辛':['Jin Fém','fem'],'壬':['Jang Víz','viz'],'癸':['Jin Víz','viz'],
-    '子':'Patkány','丑':'Bivaly','寅':'Tigris','卯':'Nyúl','辰':'Sárkány','巳':'Kígyó','午':'Ló','未':'Kecske','申':'Majom','酉':'Kakas','戌':'Kutya','亥':'Disznó'
+// Új, leegyszerűsített szótár a hibák elkerülésére
+const szotar = {
+    '甲':['Jang Fa','fa'], '乙':['Jin Fa','fa'], '丙':['Jang Tűz','tuz'], '丁':['Jin Tűz','tuz'],
+    '戊':['Jang Föld','fold'], '己':['Jin Föld','fold'], '庚':['Jang Fém','fem'], '辛':['Jin Fém','fem'],
+    '壬':['Jang Víz','viz'], '癸':['Jin Víz','viz'],
+    '子':'Patkány', '丑':'Bivaly', '寅':'Tigris', '卯':'Nyúl', '辰':'Sárkány', '巳':'Kígyó', 
+    '午':'Ló', '未':'Kecske', '申':'Majom', '酉':'Kakas', '戌':'Kutya', '亥':'Disznó'
 };
-
-function set(id, ch, isS) {
-    const d = document.getElementById(id);
-    if(isS) {
-        d.innerText = dict[ch][0];
-        d.className = 'stem ' + dict[ch][1];
-    } else {
-        d.innerText = dict[ch] || ch;
-        d.className = 'branch';
-    }
-}
 
 function calc() {
     try {
-        const v = document.getElementById('bDate').value;
-        if(!v) return;
-        const l = Solar.fromDate(new Date(v)).getLunar().getEightChar();
+        const val = document.getElementById('bDate').value;
+        if(!val) return;
         
-        set('yS', l.getYearGan(), true); set('yB', l.getYearZhi(), false);
-        set('mS', l.getMonthGan(), true); set('mB', l.getMonthZhi(), false);
-        set('dS', l.getDayGan(), true); set('dB', l.getDayZhi(), false);
-        set('hS', l.getHourGan(), true); set('hB', l.getHourZhi(), false);
+        const d = new Date(val);
+        const l = Solar.fromDate(d).getLunar().getEightChar();
+        
+        // Adatok beírása
+        megjelenit('yS', 'yB', l.getYearGan(), l.getYearZhi());
+        megjelenit('mS', 'mB', l.getMonthGan(), l.getMonthZhi());
+        megjelenit('dS', 'dB', l.getDayGan(), l.getDayZhi());
+        megjelenit('hS', 'hB', l.getHourGan(), l.getHourZhi());
         
         document.getElementById('res').style.display = 'flex';
-    } catch(e) { alert("Hiba! Próbáld meg újra."); }
+    } catch(e) { 
+        alert("Hiba történt. Frissítsd az oldalt és próbáld újra!");
+        console.log(e);
+    }
+}
+
+function megjelenit(sId, bId, sChar, bChar) {
+    const sEl = document.getElementById(sId);
+    const bEl = document.getElementById(bId);
+    
+    const sData = szotar[sChar]; // [Név, Színosztály]
+    const bName = szotar[bChar]; // Csak név
+    
+    sEl.innerText = sData[0];
+    sEl.className = 'stem ' + sData[1];
+    bEl.innerText = bName || bChar;
 }
 </script>
 </body>
