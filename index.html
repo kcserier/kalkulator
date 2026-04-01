@@ -4,20 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kínai Sorsfejtő</title>
-    <!-- JAVÍTOTT: Megbízható CDN forrás -->
-    <script src="https://cloudflare.com"></script>
+    <!-- Stabil CDN link -->
+    <script src="https://jsdelivr.net"></script>
     <style>
         :root { --arany: #d4af37; --sotet: #1a1a1a; }
         body { font-family: 'Georgia', serif; background: var(--sotet); color: #f4f4f4; text-align: center; padding: 20px; }
         .box { max-width: 450px; margin: auto; background: #2d2d2d; padding: 25px; border-radius: 15px; border: 1px solid var(--arany); box-shadow: 0 0 20px rgba(212,175,55,0.3); }
         h1 { color: var(--arany); }
-        input { padding: 12px; border-radius: 5px; margin-bottom: 20px; width: 85%; border: 1px solid var(--arany); background: #333; color: white; }
-        button { background: var(--arany); color: black; border: none; padding: 15px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 90%; margin-bottom: 20px; }
+        input { padding: 12px; border-radius: 5px; margin-bottom: 20px; width: 85%; border: 1px solid var(--arany); background: #333; color: white; font-size: 16px; }
+        button { background: var(--arany); color: black; border: none; padding: 15px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 90%; margin-bottom: 20px; font-size: 16px; }
+        button:active { transform: scale(0.98); }
         .grid { display: none; justify-content: space-around; gap: 5px; margin-top: 20px; }
         .col { flex: 1; border: 1px solid #555; padding: 10px 2px; border-radius: 8px; background: rgba(0,0,0,0.4); }
-        .label { font-size: 10px; color: var(--arany); display: block; margin-bottom: 5px; font-weight: bold; }
-        .stem { font-weight: bold; font-size: 13px; padding: 5px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; }
-        .branch { font-size: 12px; color: #eee; }
+        .label { font-size: 10px; color: var(--arany); display: block; margin-bottom: 8px; font-weight: bold; }
+        .stem { font-weight: bold; font-size: 13px; padding: 8px 2px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; }
+        .branch { font-size: 12px; color: #eee; display: block; margin-top: 5px; }
+        /* Színek */
         .fa { background: #27ae60; } .tuz { background: #c0392b; } .fold { background: #b7950b; } .fem { background: #7f8c8d; } .viz { background: #2980b9; }
         .cta { margin-top: 30px; border-top: 1px solid #444; padding-top: 20px; }
         .email-link { color: var(--arany); text-decoration: none; border: 1px solid var(--arany); padding: 10px 20px; border-radius: 5px; display: inline-block; }
@@ -31,15 +33,15 @@
     <button onclick="calc()">Sorsfejtés Generálása</button>
 
     <div id="res" class="grid">
-        <div class="col"><span class="label">ÓRA</span><div id="hS"></div><div id="hB" class="branch"></div></div>
-        <div class="col"><span class="label">NAP</span><div id="dS"></div><div id="dB" class="branch"></div></div>
-        <div class="col"><span class="label">HÓNAP</span><div id="mS"></div><div id="mB" class="branch"></div></div>
         <div class="col"><span class="label">ÉV</span><div id="yS"></div><div id="yB" class="branch"></div></div>
+        <div class="col"><span class="label">HÓNAP</span><div id="mS"></div><div id="mB" class="branch"></div></div>
+        <div class="col"><span class="label">NAP</span><div id="dS"></div><div id="dB" class="branch"></div></div>
+        <div class="col"><span class="label">ÓRA</span><div id="hS"></div><div id="hB" class="branch"></div></div>
     </div>
 
     <div class="cta">
         <p>Szeretnél részletes elemzést?</p>
-        <a href="mailto:kcserier@://gmail.com érdeklődés" class="email-link">Kapcsolatfelvétel</a>
+        <a href="mailto:kcserier@://gmail.com Elemzés Érdeklődés" class="email-link">Kapcsolatfelvétel</a>
     </div>
 </div>
 
@@ -54,24 +56,24 @@ const szotar = {
 
 function calc() {
     try {
-        const val = document.getElementById('bDate').value;
-        if(!val) return;
+        const inputVal = document.getElementById('bDate').value;
+        if(!inputVal) { alert("Kérlek, válassz dátumot!"); return; }
         
-        const d = new Date(val);
-        // JAVÍTOTT ELÉRÉS: A Solar és Lunar globálisan elérhető a script betöltése után
+        const d = new Date(inputVal);
         const solar = Solar.fromDate(d);
         const lunar = solar.getLunar();
-        const baZi = lunar.getEightChar();
+        const bazi = lunar.getEightChar();
         
-        megjelenit('yS', 'yB', baZi.getYearGan(), baZi.getYearZhi());
-        megjelenit('mS', 'mB', baZi.getMonthGan(), baZi.getMonthZhi());
-        megjelenit('dS', 'dB', baZi.getDayGan(), baZi.getDayZhi());
-        megjelenit('hS', 'hB', baZi.getHourGan(), baZi.getHourZhi());
+        // Adatok kinyerése
+        megjelenit('yS', 'yB', bazi.getYearGan(), bazi.getYearZhi());
+        megjelenit('mS', 'mB', bazi.getMonthGan(), bazi.getMonthZhi());
+        megjelenit('dS', 'dB', bazi.getDayGan(), bazi.getDayZhi());
+        megjelenit('hS', 'hB', bazi.getHourGan(), bazi.getHourZhi());
         
         document.getElementById('res').style.display = 'flex';
     } catch(e) { 
-        console.error("Hiba:", e);
-        alert("Hiba történt. Ellenőrizd az internetkapcsolatot és próbáld újra!");
+        console.error("Részletes hiba:", e);
+        alert("Technikai hiba történt. Kérlek frissíts rá (F5), vagy próbáld meg másik böngészőben!");
     }
 }
 
@@ -79,11 +81,11 @@ function megjelenit(sId, bId, sChar, bChar) {
     const sEl = document.getElementById(sId);
     const bEl = document.getElementById(bId);
     
-    const sData = szotar[sChar] || [sChar, ''];
+    const sData = szotar[sChar] || [sChar, '']; 
     const bName = szotar[bChar] || bChar;
     
     sEl.innerText = sData[0];
-    sEl.className = 'stem ' + sData[1];
+    sEl.className = 'stem ' + (sData[1] || '');
     bEl.innerText = bName;
 }
 </script>
