@@ -4,23 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kínai Sorsfejtő</title>
-    <!-- Stabil CDN link -->
-    <script src="https://jsdelivr.net"></script>
+    <!-- STABIL MOTOR BETÖLTÉSE -->
+    <script src="https://unpkg.com"></script>
     <style>
         :root { --arany: #d4af37; --sotet: #1a1a1a; }
         body { font-family: 'Georgia', serif; background: var(--sotet); color: #f4f4f4; text-align: center; padding: 20px; }
         .box { max-width: 450px; margin: auto; background: #2d2d2d; padding: 25px; border-radius: 15px; border: 1px solid var(--arany); box-shadow: 0 0 20px rgba(212,175,55,0.3); }
-        h1 { color: var(--arany); }
         input { padding: 12px; border-radius: 5px; margin-bottom: 20px; width: 85%; border: 1px solid var(--arany); background: #333; color: white; font-size: 16px; }
         button { background: var(--arany); color: black; border: none; padding: 15px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 90%; margin-bottom: 20px; font-size: 16px; }
-        button:active { transform: scale(0.98); }
         .grid { display: none; justify-content: space-around; gap: 5px; margin-top: 20px; }
         .col { flex: 1; border: 1px solid #555; padding: 10px 2px; border-radius: 8px; background: rgba(0,0,0,0.4); }
         .label { font-size: 10px; color: var(--arany); display: block; margin-bottom: 8px; font-weight: bold; }
-        .stem { font-weight: bold; font-size: 13px; padding: 8px 2px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; }
+        .stem { font-weight: bold; font-size: 13px; padding: 6px 2px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; }
         .branch { font-size: 12px; color: #eee; display: block; margin-top: 5px; }
-        /* Színek */
-        .fa { background: #27ae60; } .tuz { background: #c0392b; } .fold { background: #b7950b; } .fem { background: #7f8c8d; } .viz { background: #2980b9; }
+        /* Színek fixálva */
+        .fa { background-color: #27ae60 !important; } .tuz { background-color: #c0392b !important; } 
+        .fold { background-color: #b7950b !important; } .fem { background-color: #7f8c8d !important; } 
+        .viz { background-color: #2980b9 !important; }
         .cta { margin-top: 30px; border-top: 1px solid #444; padding-top: 20px; }
         .email-link { color: var(--arany); text-decoration: none; border: 1px solid var(--arany); padding: 10px 20px; border-radius: 5px; display: inline-block; }
     </style>
@@ -28,7 +28,7 @@
 <body>
 
 <div class="box">
-    <h1>Kínai Sorsfejtő</h1>
+    <h1 style="color:var(--arany)">Kínai Sorsfejtő</h1>
     <input type="datetime-local" id="bDate">
     <button onclick="calc()">Sorsfejtés Generálása</button>
 
@@ -41,7 +41,7 @@
 
     <div class="cta">
         <p>Szeretnél részletes elemzést?</p>
-        <a href="mailto:kcserier@://gmail.com Elemzés Érdeklődés" class="email-link">Kapcsolatfelvétel</a>
+        <a href="mailto:kcserier@://gmail.com Elemzés" class="email-link">Kapcsolatfelvétel</a>
     </div>
 </div>
 
@@ -56,15 +56,13 @@ const szotar = {
 
 function calc() {
     try {
-        const inputVal = document.getElementById('bDate').value;
-        if(!inputVal) { alert("Kérlek, válassz dátumot!"); return; }
+        const val = document.getElementById('bDate').value;
+        if(!val) return;
         
-        const d = new Date(inputVal);
-        const solar = Solar.fromDate(d);
-        const lunar = solar.getLunar();
-        const bazi = lunar.getEightChar();
+        const d = new Date(val);
+        // Ez a hívás a legbiztosabb módszer:
+        const bazi = Solar.fromDate(d).getLunar().getEightChar();
         
-        // Adatok kinyerése
         megjelenit('yS', 'yB', bazi.getYearGan(), bazi.getYearZhi());
         megjelenit('mS', 'mB', bazi.getMonthGan(), bazi.getMonthZhi());
         megjelenit('dS', 'dB', bazi.getDayGan(), bazi.getDayZhi());
@@ -72,21 +70,17 @@ function calc() {
         
         document.getElementById('res').style.display = 'flex';
     } catch(e) { 
-        console.error("Részletes hiba:", e);
-        alert("Technikai hiba történt. Kérlek frissíts rá (F5), vagy próbáld meg másik böngészőben!");
+        alert("Hiba: A motor nem töltődött be időben. Frissíts az oldalon (F5)!");
+        console.log(e);
     }
 }
 
 function megjelenit(sId, bId, sChar, bChar) {
+    const data = szotar[sChar] || [sChar, ''];
     const sEl = document.getElementById(sId);
-    const bEl = document.getElementById(bId);
-    
-    const sData = szotar[sChar] || [sChar, '']; 
-    const bName = szotar[bChar] || bChar;
-    
-    sEl.innerText = sData[0];
-    sEl.className = 'stem ' + (sData[1] || '');
-    bEl.innerText = bName;
+    sEl.innerText = data[0];
+    sEl.className = 'stem ' + data[1];
+    document.getElementById(bId).innerText = szotar[bChar] || bChar;
 }
 </script>
 </body>
