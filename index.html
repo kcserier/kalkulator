@@ -4,34 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kínai Sorsfejtő</title>
-    <!-- Stabil, külső motor behívása -->
     <script src="https://jsdelivr.net"></script>
     <style>
         :root { --arany: #d4af37; --sotet: #1a1a1a; }
         body { font-family: 'Georgia', serif; background: var(--sotet); color: #f4f4f4; text-align: center; padding: 20px; }
-        .box { max-width: 500px; margin: auto; background: #2d2d2d; padding: 25px; border-radius: 15px; border: 1px solid var(--arany); box-shadow: 0 0 20px rgba(212,175,55,0.3); }
-        h1 { color: var(--arany); margin-bottom: 5px; }
+        .box { max-width: 450px; margin: auto; background: #2d2d2d; padding: 25px; border-radius: 15px; border: 1px solid var(--arany); box-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        h1 { color: var(--arany); }
         input { padding: 12px; border-radius: 5px; margin-bottom: 20px; width: 85%; border: 1px solid var(--arany); background: #333; color: white; }
-        button { background: var(--arany); color: black; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 16px; width: 90%; }
-        .grid { display: flex; justify-content: space-around; margin-top: 30px; gap: 8px; display: none; }
+        button { background: var(--arany); color: black; border: none; padding: 15px; border-radius: 30px; cursor: pointer; font-weight: bold; width: 90%; margin-bottom: 20px; }
+        .grid { display: flex; justify-content: space-around; gap: 5px; display: none; }
         .col { flex: 1; border: 1px solid #555; padding: 10px 2px; border-radius: 8px; background: rgba(0,0,0,0.4); }
-        .label { font-size: 11px; color: var(--arany); display: block; margin-bottom: 8px; font-weight: bold; }
-        .stem { font-weight: bold; font-size: 15px; padding: 6px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; text-shadow: 1px 1px 2px black; }
-        .branch { font-size: 13px; color: #eee; font-weight: bold; }
-        /* Színek */
+        .label { font-size: 10px; color: var(--arany); display: block; margin-bottom: 5px; font-weight: bold; }
+        .stem { font-weight: bold; font-size: 14px; padding: 5px; border-radius: 4px; display: block; margin-bottom: 5px; color: white; text-shadow: 1px 1px 2px black; }
+        .branch { font-size: 13px; color: #eee; }
+        /* Elemszínek */
         .fa { background: #27ae60; } .tuz { background: #c0392b; } .fold { background: #b7950b; } .fem { background: #7f8c8d; } .viz { background: #2980b9; }
-        .cta { margin-top: 35px; border-top: 1px dotted #666; padding-top: 20px; }
-        .email-link { color: var(--arany); text-decoration: none; border: 1px solid var(--arany); padding: 10px 20px; border-radius: 5px; display: inline-block; transition: 0.3s; }
-        .email-link:hover { background: var(--arany); color: black; }
+        .cta { margin-top: 30px; border-top: 1px solid #444; padding-top: 20px; }
+        .email-link { color: var(--arany); text-decoration: none; border: 1px solid var(--arany); padding: 10px 20px; border-radius: 5px; display: inline-block; }
     </style>
 </head>
 <body>
 
 <div class="box">
     <h1>Kínai Sorsfejtő</h1>
-    <p style="font-size: 14px; color: #aaa;">Add meg születési dátumod és órád!</p>
     <input type="datetime-local" id="bDate">
-    <br>
     <button onclick="calc()">Sorsfejtés Generálása</button>
 
     <div id="res" class="grid">
@@ -43,29 +39,40 @@
 
     <div class="cta">
         <p>Szeretnél részletes elemzést?</p>
-        <a href="mailto:kcserier@gmail.com elemzés érdeklődés" class="email-link">Kapcsolatfelvétel</a>
+        <a href="mailto:kcserier@://gmail.com elemzés érdeklődés" class="email-link">Kapcsolatfelvétel</a>
     </div>
 </div>
 
 <script>
 const dict = {
-    '甲':'Jang Fa','乙':'Jin Fa','丙':'Jang Tűz','丁':'Jin Tűz','戊':'Jang Föld','己':'Jin Föld','庚':'Jang Fém','辛':'Jin Fém','壬':'Jang Víz','癸':'Jin Víz',
+    '甲':['Jang Fa','fa'],'乙':['Jin Fa','fa'],'丙':['Jang Tűz','tuz'],'丁':['Jin Tűz','tuz'],'戊':['Jang Föld','fold'],'己':['Jin Föld','fold'],'庚':['Jang Fém','fem'],'辛':['Jin Fém','fem'],'壬':['Jang Víz','viz'],'癸':['Jin Víz','viz'],
     '子':'Patkány','丑':'Bivaly','寅':'Tigris','卯':'Nyúl','辰':'Sárkány','巳':'Kígyó','午':'Ló','未':'Kecske','申':'Majom','酉':'Kakas','戌':'Kutya','亥':'Disznó'
-};
-
-const colors = {
-    'Jang Fa':'fa','Jin Fa':'fa','Jang Tűz':'tuz','Jin Tűz':'tuz','Jang Föld':'fold','Jin Föld':'fold','Jang Fém':'fem','Jin Fém':'fem','Jang Víz':'viz','Jin Víz':'viz'
 };
 
 function set(id, ch, isS) {
     const d = document.getElementById(id);
-    const nev = dict[ch] || ch;
-    d.innerText = nev;
     if(isS) {
-        d.className = 'stem ' + (colors[nev] || '');
+        d.innerText = dict[ch][0];
+        d.className = 'stem ' + dict[ch][1];
     } else {
+        d.innerText = dict[ch] || ch;
         d.className = 'branch';
     }
+}
+
+function calc() {
+    try {
+        const v = document.getElementById('bDate').value;
+        if(!v) return;
+        const l = Solar.fromDate(new Date(v)).getLunar().getEightChar();
+        
+        set('yS', l.getYearGan(), true); set('yB', l.getYearZhi(), false);
+        set('mS', l.getMonthGan(), true); set('mB', l.getMonthZhi(), false);
+        set('dS', l.getDayGan(), true); set('dB', l.getDayZhi(), false);
+        set('hS', l.getHourGan(), true); set('hB', l.getHourZhi(), false);
+        
+        document.getElementById('res').style.display = 'flex';
+    } catch(e) { alert("Hiba! Próbáld meg újra."); }
 }
 </script>
 </body>
