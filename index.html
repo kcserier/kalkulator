@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Profi BaZi Kalkulátor - Magyarul</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        :root {
+            --fa: #2ecc71; --tuz: #e74c3c; --fold: #f1c40f; --fem: #95a5a6; --viz: #3498db;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        button { background: #b33939; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        .bazi-table { display: flex; justify-content: space-between; margin-top: 30px; gap: 10px; }
+        .column { flex: 1; border: 2px solid #eee; padding: 15px 5px; border-radius: 10px; background: #fafafa; }
+        .column h4 { margin: 0 0 10px 0; color: #777; font-size: 14px; text-transform: uppercase; }
+        
+        .stem { font-weight: bold; font-size: 1.1em; display: block; margin-bottom: 5px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 5px; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .branch { font-size: 1em; color: #333; font-weight: 500; }
+
+        /* Elem színek */
+        .color-fa { background-color: var(--fa); }
+        .color-tuz { background-color: var(--tuz); }
+        .color-fold { background-color: var(--fold); }
+        .color-fem { background-color: var(--fem); }
+        .color-viz { background-color: var(--viz); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kínai Asztrológia Kalkulátor</h1>
+    <p>Add meg a születési adataidat!</p>
+    
+    <div class="input-group">
+        <input type="datetime-local" id="birthDate">
+    </div>
+    <button onclick="calculateBazi()">Sorsfejtés Generálása</button>
+
+    <div class="bazi-table" id="results" style="display:none;">
+        <div class="column"><h4>Óra</h4><div id="hourStem" class="stem"></div><div id="hourBranch" class="branch"></div></div>
+        <div class="column"><h4>Nap</h4><div id="dayStem" class="stem"></div><div id="dayBranch" class="branch"></div></div>
+        <div class="column"><h4>Hónap</h4><div id="monthStem" class="stem"></div><div id="monthBranch" class="branch"></div></div>
+        <div class="column"><h4>Év</h4><div id="yearStem" class="stem"></div><div id="yearBranch" class="branch"></div></div>
+    </div>
+</div>
+
+<script>
+// Szótárak a magyarításhoz
+const forditas = {
+    // Mennyei Törzsek (Elem + Polaritás)
+    '甲': { nev: 'Jang Fa', cls: 'color-fa' }, '乙': { nev: 'Jin Fa', cls: 'color-fa' },
+    '丙': { nev: 'Jang Tűz', cls: 'color-tuz' }, '丁': { nev: 'Jin Tűz', cls: 'color-tuz' },
+    '戊': { nev: 'Jang Föld', cls: 'color-fold' }, '己': { nev: 'Jin Föld', cls: 'color-fold' },
+    '庚': { nev: 'Jang Fém', cls: 'color-fem' }, '辛': { nev: 'Jin Fém', cls: 'color-fem' },
+    '壬': { nev: 'Jang Víz', cls: 'color-viz' }, '癸': { nev: 'Jin Víz', cls: 'color-viz' },
+
+    // Földi Ágak (Állatjegyek)
+    '子': 'Patkány (Víz)', '丑': 'Bivaly (Föld)', '寅': 'Tigris (Fa)', '卯': 'Nyúl (Fa)',
+    '辰': 'Sárkány (Föld)', '巳': 'Kígyó (Tűz)', '午': 'Ló (Tűz)', '未': 'Kecske (Föld)',
+    '申': 'Majom (Fém)', '酉': 'Kakas (Fém)', '戌': 'Kutya (Föld)', '亥': 'Disznó (Víz)'
+};
+
+function displayElement(id, char) {
+    const el = document.getElementById(id);
+    const data = forditas[char];
+    if (typeof data === 'object') {
+        el.innerText = data.nev;
+        el.className = 'stem ' + data.cls;
+    } else {
+        el.innerText = data || char;
+    }
+}
+
+function calculateBazi() {
+    const dateVal = document.getElementById('birthDate').value;
+    if(!dateVal) return alert("Kérlek, adj meg dátumot!");
+
+    const date = new Date(dateVal);
+    const lunar = Lunar.fromDate(date);
+    const eb = lunar.getEightChar();
+
+    // Megjelenítés magyarul és színesen
+    displayElement('yearStem', eb.getYearGan());
+    displayElement('yearBranch', eb.getYearZhi());
+    
+    displayElement('monthStem', eb.getMonthGan());
+    displayElement('monthBranch', eb.getMonthZhi());
+    
+    displayElement('dayStem', eb.getDayGan());
+    displayElement('dayBranch', eb.getDayZhi());
+    
+    displayElement('hourStem', eb.getHourGan());
+    displayElement('hourBranch', eb.getHourZhi());
+
+    document.getElementById('results').style.display = 'flex';
+}
+</script>
+
+</body>
+</html>
