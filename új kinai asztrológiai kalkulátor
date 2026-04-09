@@ -1,77 +1,528 @@
 <!DOCTYPE html>
 <html lang="hu">
-<head>
+  <head>
     <meta charset="utf-8">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" >
+	
+    <meta name="description" content="Kínai horoszkóp kalkulátor - BaZi kalkulátor">
+    <meta name="keywords" content="BaZi, Kínai horoszkóp, Kínai horoszkóp kalkulátor, BaZi kalkulátor, Kínai asztrológia, Nagy Melinda, Nemes Balázs">
+    <meta name="author" content="Nemes Balázs - baleesoft - http://astrotoolkit.com">
     <title>Kínai asztrológia - horoszkóp kalkulátor</title>
-    <!-- Itt maradnak a te stíluslapjaid és scriptjeid -->
-    <style>
-        .resultBox { 
-            margin-top: 20px; padding: 20px; border: 1px solid #ccc; 
-            background: #f9f9f9; display: none; text-align: center;
-        }
-        .jegy-nev { font-size: 24px; font-weight: bold; color: #d32f2f; }
-        .details { font-size: 18px; margin-top: 10px; }
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="css/styles.min.css?v=4.0">
+    <link rel="stylesheet" type="text/css" href="css/inputstyles.min.css?v=4.0">
+    <link rel="stylesheet" type="text/css" href="css/sprites.min.css?v=4.0">
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="css/auto-complete.css">
+
+    <script type="text/javascript" src="scripts/basescripts.min.js?v=4.0"></script>
+    <script type="text/javascript" src="scripts/baziglobals.min.js?v=4.0"></script>
+    <script type="text/javascript" src="scripts/baziscripts.min.js?v=4.0"></script>
+    <script type="text/javascript" src="scripts/auto-complete.min.js"></script>
+
+    <!--[if IE]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+	    <script type="text/javascript" src="scripts/jquery-1.11.3.min.js"></script>
+    <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>	-->
+
+    <style type="text/css" media="print">
+      .dontprint { display: none; }
+
+      .resultContainer {
+        margin-bottom: 0;
+      }
     </style>
-</head>
-<body onload="loadFunction();">
 
-    <div id="mainContainer" class="mainContainer">
-        <div class="inputFormContainer">
-            <h3>Születési adatok (2080-ig hitelesítve)</h3>
-            
-            <form id="inputFormId" onsubmit="return false;">
-                <div class="formLabelContainerInput">
-                    <label class="formLabel">Születési dátum</label>
-                    <input type="date" id="birthDate" class="css-textbox" min="1924-02-05" max="2080-12-31">
-                </div>
-                <button type="button" onclick="calculateZodiac()" class="btn">Kalkuláció</button>
-            </form>
-
-            <div id="zodiacResult" class="resultBox">
-                <div id="resAnimal" class="jegy-nev"></div>
-                <div id="resElement" class="details"></div>
-                <div id="resPolarity" class="details"></div>
-            </div>
-        </div>
-    </div>
-
-<script type="text/javascript">
-    // Holdújév táblázat (JSON formátumban a pontos váltáshoz 2080-ig)
-    const cnyTable = {
-        2024: "02-10", 2025: "01-29", 2026: "02-17", 2027: "02-06", 2028: "01-26", 2029: "02-13", 2030: "02-03",
-        // ... (A rendszer automatikusan kalkulálja a ciklusokat 2080-ig)
-    };
-
-    function calculateZodiac() {
-        const input = document.getElementById('birthDate').value;
-        if (!input) { alert("Kérlek, adj meg egy dátumot!"); return; }
-
-        const d = new Date(input);
-        let year = d.getFullYear();
-        const mmdd = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-        // Holdújév korrekció: Ha az adott év holdújév dátuma előtt születtél, az előző évhez tartozol
-        // (Megjegyzés: A teljes táblázatot érdemes egy külső JS-be tenni, itt a logika látszik)
-        if (cnyTable[year] && mmdd < cnyTable[year]) {
-            year--;
+    <script type="text/javascript">
+      function focusFirstInput() {
+	    if($('#modalDialogSubscribe').is(':hidden')) {
+		  document.getElementById("edtName").focus();   
+		}        	  
+      }
+      
+	  function urlParameter(name){
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+            if (results==null){
+              return null;
+            }
+            else {
+              return results[1] || 0;
+            }
+          };
+      
+      function setWelcomeText() {
+        var today = new Date();
+        var hourNow = today.getHours();
+		var personName = urlParameter('name');
+		if (personName !== null) {
+		  personName = ', ' + decodeURIComponent(personName);
+		} else {
+		  personName = '';
+		}
+      
+        var welcomeTitle = document.getElementById("welcomeTitle");
+        if (hourNow > 18) {
+            welcomeTitle.innerHTML = 'Szép estét'+personName+'!';
+        } else if (hourNow > 12) {
+            welcomeTitle.innerHTML = 'Kellemes délutánt'+personName+'!';
+        } else if (hourNow > 9) {
+            welcomeTitle.innerHTML = 'Szép napot'+personName+'!';
+        } else if (hourNow > 6) {
+            welcomeTitle.innerHTML = 'Jó reggelt'+personName+'!';
+        } else {
+            welcomeTitle.innerHTML = 'Kellemes estét'+personName+'!';
         }
+      }
+      
+      function manageURLParams() {
 
-        const animals = ["Majom", "Kakas", "Kutya", "Disznó", "Patkány", "Bivaly", "Tigris", "Nyúl", "Sárkány", "Kígyó", "Ló", "Kecske"];
-        const elements = ["Fém", "Víz", "Fa", "Tűz", "Föld"];
-        
-        const animal = animals[year % 12];
-        const element = elements[Math.floor((year % 10) / 2)];
-        const polarity = (year % 2 === 0) ? "Jang (Aktív)" : "Jin (Befogadó)";
+          if (urlParameter('NA') !== null) {
+              document.getElementById("edtName").value = decodeURIComponent(urlParameter('NA'));//.replace(/%20/g, " ");
 
-        // Eredmény megjelenítése
-        const resDiv = document.getElementById('zodiacResult');
-        resDiv.style.display = 'block';
-        document.getElementById('resAnimal').innerText = "Az Ön jegye: " + animal;
-        document.getElementById('resElement').innerText = "Eleme: " + element;
-        document.getElementById('resPolarity').innerText = "Polaritás: " + polarity;
-    }
+              document.getElementById("edtYear").value = urlParameter('YE');
+              document.getElementById("edtMonth").value = urlParameter('MO');
+              document.getElementById("edtDay").value = urlParameter('DA');
+              if (urlParameter('TU') == "false") {
+                  document.getElementById("edtHour").value = urlParameter('HO');
+                  document.getElementById("edtMin").value = urlParameter('MI');
+              }
 
-    function loadFunction() {
-        console.log("Kalkulátor készen áll.");
-    }
+			  // citySelectorType
+			  var cstype = decodeURIComponent(urlParameter('CST'));
+			  if (cstype == 0) {
+			    document.getElementById("advanced-city").value = decodeURIComponent(urlParameter('CI'));//.replace(/%20/g, " ");
+			  } else {
+              document.getElementById("edtManuallyCity").value = decodeURIComponent(urlParameter('CI'));//.replace(/%20/g, " ");
+			  }
+
+              document.getElementById("edtGender").value = urlParameter('GE');
+              if (urlParameter('TU') == "true") {
+                  document.getElementById("chkTimeUnknown").checked = urlParameter('TU');
+              }
+
+              //updateBirthDateControlListeners();
+          }
+      }
+      
+      function loadFunction() {
+        focusFirstInput();
+        setWelcomeText();
+        manageURLParams();
+      }	  
+	  
+    </script>
+  </head>
+  <body onload="loadFunction();">
+    <div id="mainContainer" class="mainContainer">
+      <div id="startContainer" class="startContainer dontprint">
+        <div class="headerInputForm dontprint">
+          <h2>Kínai asztrológia - horoszkóp kalkulátor</h2>
+        </div>
+				
+		<div id="modalDialogSubscribe" class="modalDialogSubscribe">
+		  <div>
+          <div id="mmform54549" class="mmform" style="position:relative;padding-bottom:300px;height:0;overflow:hidden;max-width:100%;"></div>
+          </div>
+		</div>
+		
+		<script>
+		  function isPositiveInteger(n) {
+		    return parseFloat(n) === n >>> 0;
+		  }
+		  
+		  $.urlParam = function(name){
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+            if (results==null){
+              return null;
+            }
+            else {
+              return results[1] || 0;
+            }
+          };
+		  
+		  $(document).ready(function(){
+		    //var idValue = $.urlParam('id'); // decodeURIComponent(idValue)
+		    //if (idValue !== null && isPositiveInteger(idValue) && parseInt(idValue) == 1) {
+		      $("#modalDialogSubscribe").hide();
+			  $("#edtName").focus();
+			//}
+		  });		
+		</script>
+		
+        <div class="inputFormContainer dontprint">
+          <div class="inputForm dontprint">
+
+		    <a href="#openModalInputForm" class="tooltips">Tippek
+		      <span>Amennyiben nyomtatáskor a <b>képek nem jelennek meg</b> a mezőkben, akkor be kell állítani, hogy a "Háttér grafikát/színeket" is nyomtassa.<br>			  
+			  A beállítás neve hasonló, de böngészőnként eltérő lehet!<br><br>
+              Ha nyomtatáskor <b>esetleg átcsúszna az oldal lábléce</b> a következő lapra, akkor nyomtatás előtt állítsuk be a margókat kb 1cm-re és akkor minden fontos információ egy lapon lesz :)<br><br>
+			     <i>Támogatott böngészők: IE9+, Chrome32+, Opera25+</i><br><br>
+			  Ha csak "9999"-es számokat látsz a Születési dátum mezőiben, akkor engedélyezni kell a böngészőben a JavaScript parancsok futtatási lehetőséget!<br>
+			  <i>(bővebb leírás itt: http://www.enable-javascript.com/)</i>				 
+			  </span>
+			</a>
+
+            <h3>Születési adatok</h3>
+
+            <div id="openModalInputForm" class="modalDialog">
+	          <div>
+		        <a href="#close" title="Bezárás" class="close">X</a>
+			
+		        <h2>Tippek a használathoz</h2>
+		        <p>Amennyiben nyomtatáskor a képek nem jelennek meg a mezőkben, akkor be kell állítani, hogy a "Háttér grafikát/színeket" is nyomtassa.<br>
+			     A beállítás neve hasonló, de böngészőnként eltérő lehet!<br><br>
+				 Ha nyomtatáskor esetleg átcsúszna az oldal lábléce a következő lapra, akkor nyomtatás előtt állítsuk be a margókat kb 1cm-re és akkor minden fontos információ egy lapon lesz :)<br><br>
+			     <i>Támogatott böngészők: IE9+, Chrome32+, Opera25+</i></p>
+		        <p>Ha csak "9999"-es számokat látsz a Születési dátum mezőiben, akkor engedélyezni kell a böngészőben a JavaScript parancsok futtatási lehetőséget!<br>
+	            <i>(bővebb leírás itt: <a style="color:#212121;" href="http://www.enable-javascript.com/" target="_blank">http://www.enable-javascript.com/</a>)</i></p>
+	          </div>
+            </div>
+
+            <form id="inputFormId" class="dontprint">
+              <div class="formLabelContainerInput">
+                <label for="edtName" class="formLabel">Név</label>
+                <input type="text" id="edtName" class="selectCity css-textbox">
+              </div>
+              <div class="formLabelContainerInput">
+                <label for="edtgender" class="formLabel">Nem</label>
+                <select class="selectGender css3-metro-dropdown css3-metro-dropdown-color-fff" id="edtGender">
+                  <option value=1>Férfi</option>
+                  <option selected value=-1>Nő</option>
+                </select>
+              </div>
+              <div class="formLabelContainerInput">
+                <label class="formLabel" for="edtYear">Születési idő</label>
+                <input type="text" id="edtYear" class="selectDate css-textbox inputRightMargin" value="1975">
+<!--
+                <select class="selectDateYear css3-metro-dropdown css3-metro-dropdown-color-fff inputRightMargin" id="edtYear">
+                  <option>9999</option>
+                </select>
+-->
+                <select class="selectMonth css3-metro-dropdown css3-metro-dropdown-color-fff inputRightMargin" id="edtMonth">
+                  <option>99</option>
+                </select>
+                <select class="selectDate css3-metro-dropdown css3-metro-dropdown-color-fff" id="edtDay">
+                  <option>99</option>
+                </select>
+              </div>
+              <div class="formLabelContainerInput">
+                <label class="formLabel" title="A helyi idő korrekciót és a téli/nyári időszámítást a kalkulátor automatikusan elvégzi">Szül.óra/perc *</label>
+                <select class="selectDateYear css3-metro-dropdown css3-metro-dropdown-color-fff inputRightMargin" id="edtHour">
+                  <option>99</option>
+                </select>
+                <select class="selectDateYear css3-metro-dropdown css3-metro-dropdown-color-fff" id="edtMin">
+                  <option>99</option>
+                </select>
+              </div>
+              <script type="text/javascript">			
+                fillMonthCombobox("edtMonth");
+                //fillNumericCombobox("edtYear", 1900, 2100);
+                fillNumericCombobox("edtDay", 1, 31);
+                fillNumericCombobox("edtHour", 0, 23);
+                fillNumericCombobox("edtMin", 0, 59);
+
+                addBirthDateControlListeners();
+              </script>			
+              <div class="formLabelContainerInput">
+                <label class="formLabel"></label>
+                <input type="checkbox" id="chkTimeUnknown" value=1 onclick="chkTimeUnknownChecked(this);"/><label for="chkTimeUnknown">Születés órája ismeretlen</label>
+                <script type="text/javascript">
+                  function chkTimeUnknownChecked(checkBox) {
+                    var edtHour = document.getElementById("edtHour");
+                    var edtMin = document.getElementById("edtMin");
+                  if (checkBox.checked) {
+                   edtHour.disabled = true; 
+                   edtMin.disabled = true; 
+                  } else {
+                   edtHour.disabled = false;
+                   edtMin.disabled = false;
+                  }
+                  }
+                </script>
+              </div>
+              <div id="divManually" class="divManually" style="display:inline">
+			      <label for="edtCityDropDown" class="formLabel"> </label>
+				  <select class="css3-metro-dropdown css3-metro-dropdown-color-fff inputRightMargin" id="edtCityDropDown" onchange="onChangeSelectForCityDropDown(this);">
+                    <option value=0 selected="selected">Magyarország</option>
+                    <option value=1>A Föld többi országa...</option>
+                  </select>
+				  <script type="text/javascript">
+				    function onChangeSelectForCityDropDown(selectBox){
+                      var googleAPIBasedCity = document.getElementById("googleAPIBasedCity");
+                      var autocompleteBasedCity = document.getElementById("autocompleteBasedCity");
+					  
+					  citySelectorType=selectBox.value;
+					  
+					  if (selectBox.value==0){
+					    googleAPIBasedCity.style.display = "none";
+						autocompleteBasedCity.style.display = "block";
+					  } else {
+					    googleAPIBasedCity.style.display = "block";
+						autocompleteBasedCity.style.display = "none";
+					  }
+					};
+				  </script>			    
+			  
+                <div class="formLabelContainerInput" id="googleAPIBasedCity" style="display: none">
+                  <label for="edtManuallyCity" class="formLabel">Város neve</label>
+                  <input type="text" id="edtManuallyCity" class="selectCity css-textbox" value="Budapest" placeholder="Település keresése...">
+                </div>
+
+				<div class="formLabelContainerInput" id="autocompleteBasedCity">
+                  <label for="advanced-city" class="formLabel">Város neve</label>
+
+					<form onsubmit="return false;" class="pure-form" style="margin:30px 0 40px">
+						<input id="advanced-city" autofocus type="text" name="q" placeholder="Település keresése..." class="selectCity css-textbox"> <!-- style="width:100%;max-width:600px;outline:0" -->
+					</form>				  
+				</div>
+				
+				<script type="text/javascript">
+				  initAdvancedCitySearch();
+				  setCityAutocompleteComboboxToDefault("advanced-city","budapest");
+				</script>
+
+                  <!--<div id="mapDetails" > --> <!--class="mapDetails"-->
+                      <!--<div class="resFormLabelContainer">
+                          <label id="mapDetailsLongLat">Hosszúsági fok:</label>
+                      </div>
+                      <div class="resFormLabelContainer">
+                          <label id="mapDetailsTZInfo">Időzóna:</label>
+                      </div>
+                      <br />-->
+                      <!--<div id="mapDetailsLink" class="resFormLabelContainer">
+                        <a href="javascript:void(0)" id="mapDetailsLink" class="simpleLinks">Haladó beállítások megnyitása</a>
+                      </div>-->
+					  <!--
+                      <input id="mapDetailsLink" type="button" value="Haladó beállítások megnyitása" class="bigSpecialDetailsButton">
+					  -->
+					  <!--
+                      <script>
+                        $('#mapDetailsLink').click(function () {
+                            $('#divMapDetails').css("visibility", "visible");
+                            $('#divMapDetails').css("height", "100%");
+                            $('#mapDetailsLink').css("visibility", "collapse");
+                            $('#mapDetailsLink').css("height", "0px");
+                            $('#mapDetails').css("visibility", "collapse");
+                            $('#mapDetails').css("height", "0px");
+                        });
+                      </script>
+					  -->
+                  <!-- </div>-->
+
+                <div id="divMapDetails" style="visibility:collapse;height:0px">
+
+				<!--
+                <div class="formLabelContainer">
+                        <h4>Itt tudod leellenőrízni a szoftver által automatikusan felajánlott időzóna és nyári i.sz. beállításokat, illetve egyedi igény szerint módosíthatod.</h4>-->
+				  <!--<h6>pl.: New York City kiválasztásakor, az időzóna mezőben -5 órának kell szerepelni, (New York az "Eastern Time Zone - UTC -05:00" zónában található) Ha nyári időszámítás volt az adott időpontban, az alatta lévő jelölő négyzetben egy pipának is szerepelnie kell!</h6>-->
+                <!--</div>-->
+				<!--
+                <div id="googleMapContainer" style="height:300px;width:100%">
+                </div>-->
+
+                <div class="formLabelContainerInput">
+                  <label class="formLabel">Hosszúsági fok</label>
+                  <select class="selectDate css3-metro-dropdown css3-metro-dropdown-color-fff" id="edtManuallyLongHour">
+                    <option>19</option>
+                  </select>
+                  <span class="inputRightMargin"> °</span>
+                  <select class="selectDate css3-metro-dropdown css3-metro-dropdown-color-fff" id="edtManuallyLongMin">
+                    <option>4</option>
+                  </select>
+                  <span class="inputRightMargin"> '</span>						  
+                  <select class="selectMonth css3-metro-dropdown css3-metro-dropdown-color-fff" id="edtManuallyLongType">
+                    <option selected value=1>keleti</option>
+                    <option value=-1>nyugati</option>
+                  </select>
+                  <script type="text/javascript">			
+
+                    fillNumericCombobox("edtManuallyLongHour", 0, 180);
+                    fillNumericCombobox("edtManuallyLongMin", 0, 59);
+                  </script>			
+                </div>
+                <div class="formLabelContainerInput">
+                  <label class="formLabel">Időzóna <i>(óra)</i></label>						  
+                  <input type="text" id="edtManuallyTZ" class="selectDate css-textbox" value="1">
+                </div>
+                <div class="formLabelContainerInput">					     
+                  <label class="formLabel"></label>
+                        <input type="checkbox" id="chhManuallyDST" value=1 /><label for="chhManuallyDST">Nyári időszámítás</label>
+                </div>
+
+                </div>
+                  
+              </div>
+              <div class="formLabelContainer">
+                <h5>
+                * A helyi idő korrekciót és a téli/nyári időszámítást a kalkulátor automatikusan elvégzi</h5>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="welcomeContainer">
+          <div class="welcomeMsg">
+            <h3 id="welcomeTitle">Üdvözöllek!</h3>
+            <!--<br>-->
+          </div>
+<!--          <div class="formLabelContainerRight">
+            <input onclick="window.open(linkMiniVideoTanfolyamShort);" type="button" value="Horoszkópod videóban" class="bigTodayButton">
+          </div>-->
+          <br><br>
+          <div class="formLabelContainerRight">
+            <input onclick="doCalculateBaZiChartForToday();" type="button" value="A mai nap horoszkópja" class="bigTodayButton">
+          </div>
+          <br><br>
+          <div class="formLabelContainerRight">
+            <input onclick="doCalculateBaZiChartWithGetInputForm();" type="button" value="Horoszkópod kiszámítása" class="bigCalculateButton">
+          </div>
+        </div>
+			<div style="font-size:12px;opacity:0.8;margin-left:15px;margin-top:20px;">
+		    </div>
+		<!--
+		<center>
+		  <a href="http://kinaiasztrologia.com/sikernaptar2020/" target="_blank">
+		    <img src="images/siker_banner_3sec.gif" alt="Kínai Sikernaptár" title="Kínai Sikernaptár">
+		  </a>
+		</center>	
+		-->
+      </div>
+	  
+      <!-- Result -->
+      <div id="resultContainer" class="resultContainer">
+	    <div style="float:left;">		  
+		  <a href="http://kinaiasztrologia.com/" class="a_kinaihoroszkop">
+		    <h2 style="display:inline-block;vertical-align:top;position:relative;margin-top:8px;margin-right:5px;color:#ffffff;font-size:14px;">Főoldal</h2>
+		    <img class="a_kinaihoroszkop_img" src="images/headerlogo.png" alt="Vissza a főoldalra..." title="Vissza a főoldalra... (kinaiasztrologia.com)">
+		  </a>
+		</div>
+        <div class="headerResult">
+          <h2>Kínai asztrológia - horoszkóp kalkulátor</h2>
+        </div>
+        <div class="resultButtonContainer dontprint">
+          <input onclick="window.location.reload();" type="button" value="Új képlet készítése" class="smallNormalButton bigMarginRight">
+          <input onclick="modifyCurrentValues();" type="button" value="Adatok módosítása" class="smallNormalButton bigMarginRight">
+           
+          <input onclick="addDay();" type="button" value="+ Nap" class="smallNormalButton">
+          <input onclick="subDay();" type="button" value="- Nap" class="smallNormalButton">
+          <input onclick="addHour();" type="button" value="+ Óra" class="smallNormalButton">
+          <input onclick="subHour();" type="button" value="- Óra" class="smallNormalButton">
+          <input onclick="addMin();" type="button" value="+ Perc" class="smallNormalButton">
+          <input onclick="subMin();" type="button" value="- Perc" class="smallNormalButton">
+
+          <input type="checkbox" id="chkShowStructureInHidden" value=1 onclick="chkShowStructureInHidden(this);">
+		    <label style="margin-top:3px;opacity:0.8" class="footerBigMargin showCheckBox" for="chkShowStructureInHidden"><i>Rejtett törzsek struktúrái</i></label>
+            <!--<label style="margin-top:3px;margin-left:15px;opacity:0;visibility:collapse" id="pleaseWaitCalcInProgress">Kérlek várj, számítás folyamatban...</label>-->
+        </div>
+        <div style="display:table-row;">
+          <div style="float:left;">
+            <div class="personalDataLeft">
+              <div class="divTitle">
+                <span>Személyes adatok</span>
+              </div>
+              <div class="resFormLabelContainer">
+                <label id="resName"></label>
+              </div>
+              <div class="resFormLabelContainer">
+                <label id="resBirthTime"></label>
+              </div>
+              <div class="resFormLabelContainer">
+                <label id="resBirthPlace"></label>
+              </div>
+                <br>
+              <div class="resFormLabelContainer">
+                <label id="resOnelem"></label><br>
+              </div>
+              <div class="resFormLabelContainer personalDataLeftNegMargin">
+                <label id="resAlapStruktura"></label>
+              </div>
+              <div class="resFormLabelContainer dontprint">
+                  <button id="resPlayOnelem" class="smallNormalButton">
+                      Horoszkópod videóban&nbsp;&nbsp;<i class="fa fa-youtube-play"></i>
+                  </button>
+              </div>
+                <br />
+                <div class="resFormLabelContainer font12px">
+                    <label id="resTZInfo" 
+                        title="A beviteli képernyőn megadott 'zóna' időpont korrigálásához figyelembe vett idő adatok: óra/perc a hosszúsági fok alapján; időegyenlet értéke [EoT] az adott napon; időzóna értéke; + ha volt nyári időszámítás">
+                    </label>
+                </div>
+              <div class="resFormLabelContainer font12px">
+                <label id="resTZInfo2"></label>
+              </div>
+                <br />
+              <div class="resFormLabelContainer font12px">
+                <label id="resLMT" title="A helyi pontos idő a kiválasztott településen, a megadott időpont korrigálása után"></label>
+              </div>
+              <div class="resFormLabelContainer font12px">
+                <label id="resUTC" title="A Greenwich kezdőkörön mért pontos idő, a megadott időpont alapján"></label>
+              </div>
+              <div class="resFormLabelContainer font12px">
+                <label id="resChinLMT" title="Az aktuális helyi pontos idő Kínában (1928 végéig Peking helyi idejére kiszámítva - 116°25', majd 1929-től a keleti hosszúság 120°-ra), a megadott időpont alapján. Az 1000 éves kalendáriummal megegyező időpont"></label>
+              </div>
+              <div class="resFormLabelContainer font12px">
+                <label id="resSolLon"></label>
+              </div>
+            </div>
+<!--            <br>
+            <div class="personalDataLeftAlapStr">
+              <div class="divTitle"><span>Önelem / Alap struktúra</span></div>
+              <div class="resFormLabelContainer">
+                <label id="resOnelem"></label><br>
+                <label id="resAlapStruktura"></label>
+              </div>
+            </div>-->
+          </div>
+          <div style="float:right;">
+            <div id="baziDataRight" class="baziDataRight">
+            </div>
+          </div>
+        </div>
+        <!-- Lucky pillars -->  
+        <div class="resultLuckyPillars" style="display:table-row;">
+          <div id="luckyPillarsBottom">
+            <div class="divTitleLuckyPillars"><span>Szerencse oszlopok</span></div>
+          </div>
+        </div>
+        <div style="display:table-row;">
+          <div class="resultAspectsLeft">
+            <div class="divTitle"><span>Szimbolikus csillagok</span></div>
+            <div id="resultAspectsLeftTable" class="resultAspectsLeftTable">
+            </div>
+          </div>
+          <div class="resultAspectsRight">
+            <div class="divTitle"><span>Horoszkóp struktúra</span></div>
+            <div id="pentagram" class="pentagram">
+            </div>
+          </div>
+        </div>
+      </div>	  
+    </div>
+	  <div class="footerDiv">
+		<div id="versionNumber" style="float:right;opacity:0.5;"><script>document.getElementById("versionNumber").innerHTML = '<i>' + versionNumber + '</i>'; </script></div>
+
+        <div class="footerDivCenter">&copy; Nagy Melinda & Nemes Balázs</div>
+        <div class="footerDivCenter">
+          <a href="http://kinaiasztrologia.com/" target="_blank">www.kinaiasztrologia.com</a>
+          <div class="footerBigMargin"><a href="http://kinaiasztrologia.com/adatvedelmi-szabalyzat/" target="_blank">adatvédelmi nyilatkozat</a></div>
+          <a href="http://astrotoolkit.com/" target="_blank">www.astrotoolkit.com</a>
+        </div>
+      </div>
+
+	  <script src="scripts/initreswnd.min.js"></script>
+
+<!--Debug Analytics link-->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-67822555-1', 'auto');
+  ga('send', 'pageview');
+
 </script>
+
+  </body>
+</html>
